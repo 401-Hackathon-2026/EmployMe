@@ -2,8 +2,22 @@ import AppShell from "@/components/layout/AppShell"
 import { Button } from "@/components/ui/button"
 import KanbanColumn from "@/components/jobs/KanbanColumn"
 import JobCard from "@/components/jobs/JobCard"
+import { getJobs } from "@/app/actions/jobs"
+import { Job } from "@/types/job"
 
-export default function JobsPage() {
+function groupJobsByStatus(jobs: Job[]) {
+  return {
+    applied: jobs.filter(j => j.status === "applied"),
+    interview: jobs.filter(j => j.status === "interview"),
+    offer: jobs.filter(j => j.status === "offer"),
+    rejected: jobs.filter(j => j.status === "rejected"),
+  }
+}
+
+export default async function JobsPage() {
+  const jobs = await getJobs()
+  const grouped = groupJobsByStatus(jobs)
+
   return (
     <AppShell>
       {/* Header */}
@@ -15,20 +29,36 @@ export default function JobsPage() {
           </p>
         </div>
 
-        <Button>
-          + Add Job
-        </Button>
+        <Button>+ Add Job</Button>
       </div>
 
       {/* Kanban Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-        <KanbanColumn title="Wishlist" />
+
+
         <KanbanColumn title="Applied">
-          <JobCard />
+          {grouped.applied.map(job => (
+            <JobCard key={job.id} job={job} />
+          ))}
         </KanbanColumn>
-        <KanbanColumn title="Interview" />
-        <KanbanColumn title="Offer" />
-        <KanbanColumn title="Rejected" />
+
+        <KanbanColumn title="Interview">
+          {grouped.interview.map(job => (
+            <JobCard key={job.id} job={job} />
+          ))}
+        </KanbanColumn>
+
+        <KanbanColumn title="Offer">
+          {grouped.offer.map(job => (
+            <JobCard key={job.id} job={job} />
+          ))}
+        </KanbanColumn>
+
+        <KanbanColumn title="Rejected">
+          {grouped.rejected.map(job => (
+            <JobCard key={job.id} job={job} />
+          ))}
+        </KanbanColumn>
       </div>
     </AppShell>
   )
