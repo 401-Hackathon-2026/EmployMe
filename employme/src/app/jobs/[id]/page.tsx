@@ -1,15 +1,16 @@
 import AppShell from "@/components/layout/AppShell"
 
-export default function JobDetailPage({
+export default async function JobDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: number }>
 }) {
+  const param = await params
   return (
     <AppShell>
       <h1 className="text-2xl font-bold">Job Detail</h1>
       <p className="text-muted-foreground">
-        Job ID: {params.id}
+        Job ID: {param.id}
       </p>
     </AppShell>
   )
