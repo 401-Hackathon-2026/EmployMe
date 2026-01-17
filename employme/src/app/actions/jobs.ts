@@ -31,3 +31,19 @@ export async function createJob(job: Partial<Job>) {
     throw new Error("Failed to create job")
   }
 }
+
+export async function updateJobStatus(
+  jobId: string,
+  status: string
+) {
+  const { error } = await supabase
+    .from("jobs")
+    .update({ status })
+    .eq("id", jobId)
+
+  if (error) {
+    console.error(error)
+    throw new Error("Failed to update job status")
+  }
+}
+

@@ -1,14 +1,24 @@
+"use client"
+
+import { useDroppable } from "@dnd-kit/core"
 import { ReactNode } from "react"
 
 export default function KanbanColumn({
+  id,
   title,
   children,
 }: {
+  id: string
   title: string
   children?: ReactNode
 }) {
+  const { setNodeRef } = useDroppable({ id })
+
   return (
-    <div className="flex flex-col rounded-lg border bg-background">
+    <div
+      ref={setNodeRef}
+      className="flex flex-col rounded-lg border bg-background"
+    >
       <div className="border-b px-3 py-2 font-medium">
         {title}
       </div>
