@@ -1,32 +1,67 @@
 import { Job } from "@/types/job"
+import SankeyChart from "./SankeyChart"
 
-type StatusCounts = Record<string, number>
+type SankeyNode = { id: string }
+type SankeyLink = {
+  source: string
+  target: string
+  value: number
+}
 
-function getStatusCounts(jobs: Job[]): StatusCounts {
-  return jobs.reduce((acc, job) => {
+function buildSankeyData(jobs: Job[]) {
+  const nodes: SankeyNode[] = [
+    { id: "Applied" },
+    { id: "Interview" },
+    { id: "Offer" },
+    { id: "Rejected" },
+  ]
+
+  const counts = jobs.reduce<Record<string, number>>((acc, job) => {
     acc[job.status] = (acc[job.status] || 0) + 1
     return acc
-  }, {} as StatusCounts)
+  }, {})
+
+  const links: SankeyLink[] = []
+
+  if (counts.applied) {
+    links.push({
+      source: "Applied",
+      target: "Interview",
+      value: counts.applied,
+    })
+  }
+
+  if (counts.interview) {
+    links.push({
+      source: "Interview",
+      target: "Offer",
+      value: counts.interview,
+    })
+  }
+
+  if (counts.rejected) {
+    links.push({
+      source: "Applied",
+      target: "Rejected",
+      value: counts.rejected,
+    })
+  }
+
+  return { nodes, links }
 }
 
 export default function ApplicationFlowCard({ jobs }: { jobs: Job[] }) {
-  const statusCounts = getStatusCounts(jobs)
+  const sankeyData = buildSankeyData(jobs)
 
   return (
     <div className="rounded-lg border p-4">
       <h2 className="font-semibold">Application Flow</h2>
       <p className="text-sm text-muted-foreground">
-        Application stage distribution
+        Visual flow of applications
       </p>
 
-      {/* Phase 1: debug visualization */}
-      <div className="mt-4 space-y-1 text-sm">
-        {Object.entries(statusCounts).map(([status, count]) => (
-          <div key={status} className="flex justify-between">
-            <span className="capitalize">{status}</span>
-            <span className="font-medium">{count}</span>
-          </div>
-        ))}
+      <div className="mt-4">
+        <SankeyChart data={sankeyData} />
       </div>
     </div>
   )
