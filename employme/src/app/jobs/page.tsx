@@ -48,7 +48,7 @@ export default async function JobsPage() {
           ))}
         </KanbanColumn>
 
-        <KanbanColumn title="Offer">
+        <KanbanColumn title="Accepted">
           {grouped.offer.map(job => (
             <JobCard key={job.id} job={job} />
           ))}

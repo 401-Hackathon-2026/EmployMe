@@ -12,7 +12,7 @@ function buildSankeyData(jobs: Job[]) {
   const nodes: SankeyNode[] = [
     { id: "Applied" },
     { id: "Interview" },
-    { id: "Offer" },
+    { id: "Accepted" },
     { id: "Rejected" },
   ]
 
@@ -34,7 +34,7 @@ function buildSankeyData(jobs: Job[]) {
   if (counts.interview) {
     links.push({
       source: "Interview",
-      target: "Offer",
+      target: "Accepted",
       value: counts.interview,
     })
   }
