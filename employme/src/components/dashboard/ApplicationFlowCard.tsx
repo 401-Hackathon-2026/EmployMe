@@ -5,8 +5,7 @@ type SankeyNode = { id: string }
 type SankeyLink = { source: string; target: string; value: number }
 
 function buildSankeyData(jobs: Job[]) {
-  const nodes: SankeyNode[] = [
-    { id: "Pipeline" },
+  const nodes = [
     { id: "Applied" },
     { id: "Interview" },
     { id: "Offer" },
@@ -18,17 +17,34 @@ function buildSankeyData(jobs: Job[]) {
     return acc
   }, {})
 
-  const links: SankeyLink[] = []
+  const links = []
 
-  const add = (target: string, value?: number) => {
-    if (!value || value <= 0) return
-    links.push({ source: "Pipeline", target, value })
+  // Applied → Interview
+  if (counts.interview) {
+    links.push({
+      source: "Applied",
+      target: "Interview",
+      value: counts.interview,
+    })
   }
 
-  add("Applied", counts.applied)
-  add("Interview", counts.interview)
-  add("Offer", counts.offer)
-  add("Rejected", counts.rejected)
+  // Applied → Offer
+  if (counts.offer) {
+    links.push({
+      source: "Applied",
+      target: "Offer",
+      value: counts.offer,
+    })
+  }
+
+  // Applied → Rejected
+  if (counts.rejected) {
+    links.push({
+      source: "Applied",
+      target: "Rejected",
+      value: counts.rejected,
+    })
+  }
 
   return { nodes, links }
 }
