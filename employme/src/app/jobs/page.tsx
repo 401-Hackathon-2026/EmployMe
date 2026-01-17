@@ -1,12 +1,13 @@
 import AppShell from "@/components/layout/AppShell"
-import { Button } from "@/components/ui/button"
 import KanbanColumn from "@/components/jobs/KanbanColumn"
 import JobCard from "@/components/jobs/JobCard"
+import AddJobDialog from "@/components/jobs/AddJobDialog"
 import { getJobs } from "@/app/actions/jobs"
 import { Job } from "@/types/job"
 
 function groupJobsByStatus(jobs: Job[]) {
   return {
+    wishlist: jobs.filter(j => j.status === "wishlist"),
     applied: jobs.filter(j => j.status === "applied"),
     interview: jobs.filter(j => j.status === "interview"),
     offer: jobs.filter(j => j.status === "offer"),
@@ -29,13 +30,11 @@ export default async function JobsPage() {
           </p>
         </div>
 
-        <Button>+ Add Job</Button>
+        <AddJobDialog />
       </div>
 
       {/* Kanban Grid */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-
-
         <KanbanColumn title="Applied">
           {grouped.applied.map(job => (
             <JobCard key={job.id} job={job} />
@@ -48,7 +47,7 @@ export default async function JobsPage() {
           ))}
         </KanbanColumn>
 
-        <KanbanColumn title="Accepted">
+        <KanbanColumn title="Offer">
           {grouped.offer.map(job => (
             <JobCard key={job.id} job={job} />
           ))}
