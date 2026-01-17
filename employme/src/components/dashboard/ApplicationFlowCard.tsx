@@ -2,17 +2,14 @@ import { Job } from "@/types/job"
 import SankeyChart from "./SankeyChart"
 
 type SankeyNode = { id: string }
-type SankeyLink = {
-  source: string
-  target: string
-  value: number
-}
+type SankeyLink = { source: string; target: string; value: number }
 
 function buildSankeyData(jobs: Job[]) {
   const nodes: SankeyNode[] = [
+    { id: "Pipeline" },
     { id: "Applied" },
     { id: "Interview" },
-    { id: "Accepted" },
+    { id: "Offer" },
     { id: "Rejected" },
   ]
 
@@ -23,29 +20,15 @@ function buildSankeyData(jobs: Job[]) {
 
   const links: SankeyLink[] = []
 
-  if (counts.applied) {
-    links.push({
-      source: "Applied",
-      target: "Interview",
-      value: counts.applied,
-    })
+  const add = (target: string, value?: number) => {
+    if (!value || value <= 0) return
+    links.push({ source: "Pipeline", target, value })
   }
 
-  if (counts.interview) {
-    links.push({
-      source: "Interview",
-      target: "Accepted",
-      value: counts.interview,
-    })
-  }
-
-  if (counts.rejected) {
-    links.push({
-      source: "Applied",
-      target: "Rejected",
-      value: counts.rejected,
-    })
-  }
+  add("Applied", counts.applied)
+  add("Interview", counts.interview)
+  add("Offer", counts.offer)
+  add("Rejected", counts.rejected)
 
   return { nodes, links }
 }
@@ -56,9 +39,7 @@ export default function ApplicationFlowCard({ jobs }: { jobs: Job[] }) {
   return (
     <div className="rounded-lg border p-4">
       <h2 className="font-semibold">Application Flow</h2>
-      <p className="text-sm text-muted-foreground">
-        Visual flow of applications
-      </p>
+      <p className="text-sm text-muted-foreground">Visual flow of applications</p>
 
       <div className="mt-4">
         <SankeyChart data={sankeyData} />
