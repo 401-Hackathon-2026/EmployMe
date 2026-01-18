@@ -1,38 +1,40 @@
 "use client"
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useState } from "react"
+import { signup } from "@/app/actions/auth"
+import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState(""); // optional if you want email login
-  const [password, setPassword] = useState("");
-  const [retypePassword, setRetypePassword] = useState("");
-  const router = useRouter();
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [retypePassword, setRetypePassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const handleCreateUser = async () => {
-  if (!email || !password || !retypePassword) {
-    alert("All fields are required");
-    return;
-  }
-  if (password !== retypePassword) {
-    alert("Passwords do not match");
-    return;
-  }
+    if (!email || !password || !retypePassword) {
+      alert("All fields are required")
+      return
+    }
+    if (password !== retypePassword) {
+      alert("Passwords do not match")
+      return
+    }
 
-  const generatedEmail = (email || `${email}@example.com`).trim();
+    setLoading(true)
 
-  const { data, error } = await supabase.auth.signUp({ email: generatedEmail, password
-  });
+    const result = await signup(email, password)
 
-  if (error) {
-    alert(error.message);
-  } else {
-    alert("Account created! Please check your email to confirm.");
-    router.push("/");
+    setLoading(false)
+
+    if (result?.error) {
+      alert(result.error)
+    } else if (result?.success) {
+      alert(result.success)
+      router.push("/")
+    }
   }
-};
 
   return (
     <main className="flex min-h-screen items-center justify-center">
@@ -43,11 +45,12 @@ export default function SignUpPage() {
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
-              type="text"
-              placeholder="Enter username"
+              type="email"
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-md border px-3 py-2"
+              disabled={loading}
             />
           </div>
 
@@ -59,6 +62,7 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border px-3 py-2"
+              disabled={loading}
             />
           </div>
 
@@ -70,23 +74,29 @@ export default function SignUpPage() {
               value={retypePassword}
               onChange={(e) => setRetypePassword(e.target.value)}
               className="w-full rounded-md border px-3 py-2"
+              disabled={loading}
             />
           </div>
         </div>
 
-        <Button className="w-full" onClick={handleCreateUser}>
-          Create Account
+        <Button 
+          className="w-full" 
+          onClick={handleCreateUser}
+          disabled={loading}
+        >
+          {loading ? "Creating..." : "Create Account"}
         </Button>
 
         <div className="text-sm">
           <button
             className="underline"
             onClick={() => router.push("/")}
+            disabled={loading}
           >
             Back to Login
           </button>
         </div>
       </div>
     </main>
-  );
+  )
 }

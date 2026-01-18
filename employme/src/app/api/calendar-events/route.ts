@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 
 type JobRow = {
   id: string
@@ -27,53 +27,80 @@ const COLOR: Record<Kind, string> = {
   rejected: "#d62728",
 }
 
-
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url)
-  const start = searchParams.get("start") // 'YYYY-MM-DD'
-  const end = searchParams.get("end")     // 'YYYY-MM-DD'
-
-  let q = supabase
-    .from("jobs")
-    .select("id,company,position,date_applied,date_interviewed,date_accepted,date_rejected")
-
-  // only fetch jobs that have ANY date within the visible range
-  if (start && end) {
-    q = q.or(
-      [
-        `date_applied.gte.${start},date_applied.lt.${end}`,
-        `date_interviewed.gte.${start},date_interviewed.lt.${end}`,
-        `date_accepted.gte.${start},date_accepted.lt.${end}`,
-        `date_rejected.gte.${start},date_rejected.lt.${end}`,
-      ].join(",")
-    )
+  const supabase = await createClient()
+  
+  // Get authenticated user
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  
+  if (userError || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const { data, error } = await q
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const { searchParams } = new URL(req.url)
+  const start = searchParams.get("start")
+  const end = searchParams.get("end")
 
-  const jobs = (data ?? []) as JobRow[]
+  // Get jobs for this user through user_jobs
+  let query = supabase
+    .from("user_jobs")
+    .select(`
+      job_id,
+      jobs (
+        id,
+        company,
+        position,
+        date_applied,
+        date_interviewed,
+        date_accepted,
+        date_rejected
+      )
+    `)
+    .eq("user_id", user.id)
+
+  const { data, error } = await query
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  // Extract jobs from nested structure
+  const jobs = (data?.map((item: any) => item.jobs).filter(Boolean) || []) as JobRow[]
+
+  // Filter jobs by date range if provided
+  let filteredJobs = jobs
+  if (start && end) {
+    filteredJobs = jobs.filter(job => {
+      const dates = [
+        job.date_applied,
+        job.date_interviewed,
+        job.date_accepted,
+        job.date_rejected,
+      ].filter(Boolean)
+      
+      return dates.some(date => date! >= start && date! < end)
+    })
+  }
 
   const events: any[] = []
   const push = (j: JobRow, kind: Kind, date: string) => {
-  const color = COLOR[kind]
+    const color = COLOR[kind]
 
-  events.push({
-    id: `job:${j.id}:${kind}:${date}`,
-    title: `${j.company} — ${j.position} (${LABEL[kind]})`,
-    start: date,
-    allDay: true,
+    events.push({
+      id: `job:${j.id}:${kind}:${date}`,
+      title: `${j.company} — ${j.position} (${LABEL[kind]})`,
+      start: date,
+      allDay: true,
 
-    backgroundColor: color,
-    borderColor: color,
-    textColor: "#ffffff",
+      backgroundColor: color,
+      borderColor: color,
+      textColor: "#ffffff",
 
-    extendedProps: { jobId: j.id, kind },
-  })
-}
+      extendedProps: { jobId: j.id, kind },
+    })
+  }
 
-
-  for (const j of jobs) {
+  for (const j of filteredJobs) {
     if (j.date_applied) push(j, "applied", j.date_applied)
     if (j.date_interviewed) push(j, "interviewed", j.date_interviewed)
     if (j.date_accepted) push(j, "accepted", j.date_accepted)
