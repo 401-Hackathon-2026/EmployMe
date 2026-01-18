@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useDebounce } from 'use-debounce';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { logout } from '@/app/actions/auth';
 import { initialResumeState, ResumeData } from '@/types/resume';
-import { ResumeForm } from '@/components/editor/ResumeForm'
+import { ResumeForm } from '@/components/editor/ResumeForm';
+import { Button } from '@/components/ui/button';
 
 const PDFPreview = dynamic(
   () => import('@/components/pdf/PDFViewerComponent').then((mod) => mod.PDFViewerComponent),
@@ -15,8 +19,8 @@ const PDFPreview = dynamic(
 );
 
 export default function EditorPage() {
+  const router = useRouter();
   const [data, setData] = useState<ResumeData>(initialResumeState);
-
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -47,19 +51,43 @@ export default function EditorPage() {
 
   if (!isLoaded) return <div className="p-10 text-center">Loading your resume...</div>;
 
-  const updateField = (field: keyof ResumeData, value: any) => {
-    setData((prev) => ({ ...prev, [field]: value }));
-  };
-
-return (
+  return (
     // MAIN CONTAINER: Vertical Layout (Header on top, Content below)
     <div className="flex flex-col h-screen w-screen bg-gray-100 text-gray-900">
       
       {/* 1. GLOBAL HEADER BAR */}
       <header className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-300 shadow-sm z-50">
-          <div className="flex items-center gap-2">
-             <h1 className="text-xl font-bold tracking-tight">Resume Builder</h1>
-             <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">v1.0</span>
+          <div className="flex items-center gap-6">
+             <Link href="/dashboard" className="text-lg font-semibold">
+                EmployMe
+             </Link>
+             
+             <nav className="flex gap-4">
+              <Link 
+                href="/dashboard"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Dashboard
+              </Link>
+              <Link 
+                href="/jobs"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Jobs
+              </Link>
+              <Link 
+                href="/calendar"
+                className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Calendar
+              </Link>
+              <Link 
+                href="/resume/editor"
+                className="text-sm text-foreground font-medium"
+              >
+                Resume
+              </Link>
+            </nav>
           </div>
           
           <div className="flex items-center gap-3">
@@ -75,6 +103,13 @@ return (
               >
                   Save Changes
               </button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => logout()}
+              >
+                Logout
+              </Button>
           </div>
       </header>
 
