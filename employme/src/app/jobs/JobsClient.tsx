@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase/client"
 import { getJobs, updateJobStatus } from "@/app/actions/jobs"
 import { Job } from "@/types/job"
 import AppShell from "@/components/layout/AppShell"
@@ -36,13 +35,8 @@ export default function JobsClient() {
   // Load jobs when component mounts
   useEffect(() => {
     async function loadJobs() {
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (user) {
-        const userJobs = await getJobs(user.id)
-        setJobs(userJobs)
-      }
-      
+      const userJobs = await getJobs()
+      setJobs(userJobs)
       setLoading(false)
     }
     
@@ -61,11 +55,8 @@ export default function JobsClient() {
     await updateJobStatus(jobId, newStatus)
     
     // Reload jobs after updating
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const userJobs = await getJobs(user.id)
-      setJobs(userJobs)
-    }
+    const userJobs = await getJobs()
+    setJobs(userJobs)
   }
 
   if (loading) {
