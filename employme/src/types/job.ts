@@ -14,7 +14,7 @@ export interface Job {
   status: JobStatus
   priority: JobPriority
   date_applied: string | null
-  date_interviewed: string | null
+  date_of_interview: string | null
   date_accepted: string | null
   date_rejected: string | null
   created_at: string

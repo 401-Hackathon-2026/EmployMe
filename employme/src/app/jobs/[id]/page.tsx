@@ -6,8 +6,9 @@ import { notFound } from "next/navigation"
 export default async function JobDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const {id} = await params
   const supabase = await createClient()
   
   // Get authenticated user
@@ -25,7 +26,7 @@ export default async function JobDetailPage({
       jobs (*)
     `)
     .eq("user_id", user.id)
-    .eq("job_id", params.id)
+    .eq("job_id", id)
     .single()
 
   if (error || !data?.jobs) {

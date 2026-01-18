@@ -128,6 +128,8 @@ export async function updateJob(
     position: string
     status: JobStatus
     priority: JobPriority
+    date_applied?: string | null
+    date_of_interview?: string | null
   }
 ) {
   const supabase = await createClient()
