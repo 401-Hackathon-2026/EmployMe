@@ -32,13 +32,16 @@ export default function AddJobDialog() {
     setLoading(true)
 
     try {
+      const dateApplied = formData.get("date_applied") as string
+      const dateInterview = formData.get("date_of_interview") as string
+
       await createJob({
         company: formData.get("company") as string,
         position: formData.get("position") as string,
         status: formData.get("status") as JobStatus,
         priority: formData.get("priority") as JobPriority,
-        date_applied: formData.get("date_applied") as string | null,
-        date_of_interview: formData.get("date_of_interview") as string | null,
+        date_applied: dateApplied || null,
+        date_of_interview: dateInterview || null,
       })
 
       setOpen(false)
