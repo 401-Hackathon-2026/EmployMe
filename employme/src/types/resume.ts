@@ -18,8 +18,10 @@ export interface ResumeData {
         location: string
     }>;
     projects: Array<{
-        title: string;
-        skills: string;
+        name: string;
+        technologies: string;
+        date: string;
+        link: string;
         points: Array<string>;
     }>;
     skills: {
@@ -59,8 +61,10 @@ export const initialResumeState: ResumeData = {
   ],
   projects: [
     {
-        title: "Gitlytics",
-        skills: "Python, Flask, React, PostgreSQL, Docker",
+        name: "Gitlytics",
+        technologies: "Python, Flask, React, PostgreSQL, Docker",
+        date: "2024",
+        link: "",
         points: [
             "Developed a full-stack web application using with Flask serving a REST API with React as the frontend",
             "Implemented GitHub OAuth to get data from user’s repositories",

@@ -9,16 +9,10 @@ interface ResumeFormProps {
 
 export const ResumeForm = ({ data, onChange }: ResumeFormProps) => {
 
-  // --- HELPER: Generic Field Update ---
   const handleChange = (field: keyof ResumeData, value: any) => {
     onChange({ ...data, [field]: value });
   };
 
-  // --- HELPER: Nested Array Update (for Education, Experience, etc.) ---
-  // section: 'experience' | 'education' | 'projects'
-  // index: which item in the array to update
-  // field: which property of that item (e.g., 'company')
-  // value: the new value
   const handleArrayChange = (section: keyof ResumeData, index: number, field: string, value: any) => {
     // @ts-ignore - TS struggles with dynamic keys on complex unions, ignoring for brevity
     const newSectionData = [...data[section]];
@@ -26,15 +20,13 @@ export const ResumeForm = ({ data, onChange }: ResumeFormProps) => {
     handleChange(section, newSectionData);
   };
 
-  // --- HELPER: Add/Remove Items ---
+
   const addItem = (section: keyof ResumeData, initialItem: any) => {
-     // @ts-ignore
     const newSectionData = [...data[section], initialItem];
     handleChange(section, newSectionData);
   };
 
   const removeItem = (section: keyof ResumeData, index: number) => {
-     // @ts-ignore
     const newSectionData = [...data[section]];
     newSectionData.splice(index, 1);
     handleChange(section, newSectionData);
@@ -74,7 +66,7 @@ export const ResumeForm = ({ data, onChange }: ResumeFormProps) => {
         </Button>
       </section>
 
-      {/* 3. EXPERIENCE (The Complex One) */}
+      {/* 3. EXPERIENCE */}
       <section className="space-y-4">
         <h2 className="text-xl font-bold border-b pb-2">Experience</h2>
         {data.experience.map((exp, index) => (
@@ -88,7 +80,6 @@ export const ResumeForm = ({ data, onChange }: ResumeFormProps) => {
               <Input label="Date" value={exp.date} onChange={(v) => handleArrayChange('experience', index, 'date', v)} />
             </div>
 
-            {/* Bullet Points Logic */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Bullet Points (One per line)</label>
               <textarea
@@ -104,11 +95,38 @@ export const ResumeForm = ({ data, onChange }: ResumeFormProps) => {
         </Button>
       </section>
 
-      {/* 4. SKILLS */}
+      {/* 4. PROJECTS (NEW SECTION) */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold border-b pb-2">Projects</h2>
+        {/* We use specific checks to ensure projects array exists to prevent crashes if old data is loaded */}
+        {(data.projects || []).map((proj, index) => (
+          <div key={index} className="border p-4 rounded bg-gray-50 space-y-3 relative">
+            <button onClick={() => removeItem('projects', index)} className="absolute top-2 right-2 text-red-500 text-sm hover:underline">Remove</button>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="Project Name" value={proj.name} onChange={(v) => handleArrayChange('projects', index, 'name', v)} />
+              <Input label="Tech Stack" value={proj.technologies} onChange={(v) => handleArrayChange('projects', index, 'technologies', v)} />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description (One per line)</label>
+              <textarea
+                className="w-full p-2 border rounded text-sm min-h-[100px]"
+                value={proj.points.join('\n')} 
+                onChange={(e) => handleArrayChange('projects', index, 'points', e.target.value.split('\n'))}
+              />
+            </div>
+          </div>
+        ))}
+         <Button onClick={() => addItem('projects', { name: "New Project", technologies: "React, Node.js", date: "2024", link: "", points: ["Built a cool thing"] })}>
+          + Add Project
+        </Button>
+      </section>
+
+      {/* 5. SKILLS */}
       <section className="space-y-4">
         <h2 className="text-xl font-bold border-b pb-2">Skills</h2>
         <div className="space-y-3">
-           {/* Note: Skills is an object, not an array, so we update it differently */}
            <Input label="Languages" value={data.skills.languages} onChange={(v) => onChange({ ...data, skills: { ...data.skills, languages: v } })} />
            <Input label="Frameworks" value={data.skills.frameworks} onChange={(v) => onChange({ ...data, skills: { ...data.skills, frameworks: v } })} />
            <Input label="Tools" value={data.skills.tools} onChange={(v) => onChange({ ...data, skills: { ...data.skills, tools: v } })} />
@@ -119,8 +137,6 @@ export const ResumeForm = ({ data, onChange }: ResumeFormProps) => {
     </div>
   );
 };
-
-// --- MINI COMPONENTS (Internal for this file) ---
 
 const Input = ({ label, value, onChange }: { label: string, value: string, onChange: (val: string) => void }) => (
   <div>

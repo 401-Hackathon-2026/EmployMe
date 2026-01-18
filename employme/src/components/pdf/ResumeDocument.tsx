@@ -114,8 +114,8 @@ export const ResumeDocument = ({ data }: { data: ResumeData }) => (
           <View key={i} style={{ marginBottom: 10 }} wrap={false}>
             <View style={styles.row}>
               <View style={{ flexDirection: 'row', gap: 5 }}>
-                 <Text style={styles.bold}>{proj.title}</Text>
-                 <Text style={styles.italic}>| {proj.skills}</Text>
+                 <Text style={styles.bold}>{proj.name}</Text>
+                 <Text style={styles.italic}>| {proj.technologies}</Text>
               </View>
             </View>
             {proj.points.map((point, j) => (
