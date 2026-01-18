@@ -1,11 +1,13 @@
 "use client"
 
+import { useState, useEffect } from "react"
+import { supabase } from "@/lib/supabase/client"
+import { getJobs, updateJobStatus } from "@/app/actions/jobs"
+import { Job } from "@/types/job"
 import AppShell from "@/components/layout/AppShell"
 import KanbanColumn from "@/components/jobs/KanbanColumn"
 import JobCard from "@/components/jobs/JobCard"
 import AddJobDialog from "@/components/jobs/AddJobDialog"
-import { updateJobStatus } from "@/app/actions/jobs"
-import { Job } from "@/types/job"
 
 import {
   DndContext,
@@ -26,8 +28,27 @@ function groupJobsByStatus(jobs: Job[]) {
   }
 }
 
-export default function JobsClient({ jobs }: { jobs: Job[] }) {
+export default function JobsClient() {
   const router = useRouter()
+  const [jobs, setJobs] = useState<Job[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Load jobs when component mounts
+  useEffect(() => {
+    async function loadJobs() {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (user) {
+        const userJobs = await getJobs(user.id)
+        setJobs(userJobs)
+      }
+      
+      setLoading(false)
+    }
+    
+    loadJobs()
+  }, [])
+
   const grouped = groupJobsByStatus(jobs)
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -38,7 +59,23 @@ export default function JobsClient({ jobs }: { jobs: Job[] }) {
     const newStatus = over.id as string
 
     await updateJobStatus(jobId, newStatus)
-    router.refresh()
+    
+    // Reload jobs after updating
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const userJobs = await getJobs(user.id)
+      setJobs(userJobs)
+    }
+  }
+
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-muted-foreground">Loading jobs...</p>
+        </div>
+      </AppShell>
+    )
   }
 
   return (
