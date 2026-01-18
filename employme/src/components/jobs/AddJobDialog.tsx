@@ -37,10 +37,14 @@ export default function AddJobDialog() {
         position: formData.get("position") as string,
         status: formData.get("status") as JobStatus,
         priority: formData.get("priority") as JobPriority,
+        date_applied: formData.get("date_applied") as string | null,
+        date_of_interview: formData.get("date_of_interview") as string | null,
       })
 
       setOpen(false)
       router.refresh()
+      // Force a hard refresh of the jobs page
+      window.location.reload()
     } catch (error) {
       console.error("Error creating job:", error)
       alert(error instanceof Error ? error.message : "Failed to create job")
@@ -98,6 +102,24 @@ export default function AddJobDialog() {
                 <SelectItem value="high">High</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="date_applied">Date Applied</Label>
+            <Input 
+              id="date_applied" 
+              name="date_applied" 
+              type="date"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="date_of_interview">Date of Interview</Label>
+            <Input 
+              id="date_of_interview" 
+              name="date_of_interview" 
+              type="date"
+            />
           </div>
 
           <div className="flex justify-end">

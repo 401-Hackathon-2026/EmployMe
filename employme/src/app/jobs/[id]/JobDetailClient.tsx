@@ -35,6 +35,8 @@ export default function JobDetailClient({ initialJob }: { initialJob: Job }) {
         position: formData.get("position") as string,
         status: formData.get("status") as any,
         priority: formData.get("priority") as any,
+        date_applied: formData.get("date_applied") as string | null,
+        date_of_interview: formData.get("date_of_interview") as string | null,
       }
 
       await updateJob(job.id, updatedJob)
@@ -72,6 +74,8 @@ export default function JobDetailClient({ initialJob }: { initialJob: Job }) {
             <p><strong>Position:</strong> {job.position}</p>
             <p><strong>Status:</strong> {job.status}</p>
             <p><strong>Priority:</strong> {job.priority}</p>
+            <p><strong>Date Applied:</strong> {job.date_applied}</p>
+            <p><strong>Interview Date:</strong> {job.date_of_interview}</p>
           </div>
 
           <div className="flex gap-2">
@@ -117,7 +121,23 @@ export default function JobDetailClient({ initialJob }: { initialJob: Job }) {
               </SelectContent>
             </Select>
           </div>
+          <div>
+            <Label>Date Applied</Label>
+            <Input 
+              name="date_applied" 
+              type="date"
+              defaultValue={job.date_applied || ""} 
+            />
+          </div>
 
+          <div>
+            <Label>Date of Interview</Label>
+            <Input 
+              name="date_of_interview" 
+              type="date"
+              defaultValue={job.date_of_interview || ""} 
+            />
+          </div>
           <div className="flex gap-2">
             <Button type="submit" disabled={loading}>
               {loading ? "Saving..." : "Save"}
