@@ -53,10 +53,7 @@ export async function updateJobStatus(jobId: string, status: string) {
   revalidatePath("/jobs")
 }
 
-/**
- * Update full job (used by Job Detail page)
- * ⚠️ Client-auth compatible (NO auth checks here)
- */
+
 export async function updateJob(
   id: string,
   updates: {
@@ -80,10 +77,7 @@ export async function updateJob(
   revalidatePath("/jobs")
 }
 
-/**
- * Delete job
- * ⚠️ Client-auth compatible (NO auth checks here)
- */
+
 export async function deleteJob(id: string) {
   // Delete join table first (safe even if no row exists)
   await supabase.from("user_jobs").delete().eq("job_id", id)

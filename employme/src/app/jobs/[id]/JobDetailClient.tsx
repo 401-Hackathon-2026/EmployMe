@@ -60,7 +60,6 @@ export default function JobDetailClient() {
   
     await updateJob(job.id, updatedJob)
   
-    // 🔑 UPDATE LOCAL STATE
     setJob(updatedJob)
   
     setEditing(false)
