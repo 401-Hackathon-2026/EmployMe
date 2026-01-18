@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -27,21 +27,27 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired
-  const { data: { user } } = await supabase.auth.getUser()
+  // Refresh session - this is critical
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  console.log('Middleware - Path:', request.nextUrl.pathname)
+  console.log('Middleware - Has session:', !!session)
 
-  // Protect routes
+  const { pathname } = request.nextUrl
+
+  // Protected routes that require authentication
   const protectedRoutes = ['/dashboard', '/jobs']
-  const isProtectedRoute = protectedRoutes.some(route => 
-    request.nextUrl.pathname.startsWith(route)
-  )
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
 
-  if (isProtectedRoute && !user) {
+  // Redirect to login if accessing protected route without auth
+  if (isProtectedRoute && !session) {
+    console.log('Middleware - Redirecting to login (no session)')
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  // Redirect to dashboard if logged in and trying to access login
-  if (request.nextUrl.pathname === '/' && user) {
+  // Redirect to dashboard if logged in user tries to access login page
+  if (pathname === '/' && session) {
+    console.log('Middleware - Redirecting to dashboard (has session)')
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
