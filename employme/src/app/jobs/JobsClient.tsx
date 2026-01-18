@@ -10,12 +10,23 @@ import { Job } from "@/types/job"
 import {
   DndContext,
   DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
 } from "@dnd-kit/core"
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { useRouter } from "next/navigation"
+
+const STATUSES = ["applied", "interview", "offer", "rejected"] as const
+type Status = (typeof STATUSES)[number]
+
+function isStatus(value: string): value is Status {
+  return (STATUSES as readonly string[]).includes(value)
+}
 
 function groupJobsByStatus(jobs: Job[]) {
   return {
@@ -30,32 +41,51 @@ export default function JobsClient({ jobs }: { jobs: Job[] }) {
   const router = useRouter()
   const grouped = groupJobsByStatus(jobs)
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 }, // prevents click->drag accidental fires
+    })
+  )
+
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event
     if (!over) return
+    if (active.id === over.id) return
 
     const jobId = active.id as string
-    const newStatus = over.id as string
 
-    await updateJobStatus(jobId, newStatus)
+    // If you're hovering over a sortable item, over.id will be the job id.
+    // Use containerId to find the column status.
+    const containerId =
+      (over.data.current as any)?.sortable?.containerId as string | undefined
+
+    const candidateStatus = containerId ?? (over.id as string)
+
+    if (!isStatus(candidateStatus)) {
+      // If this happens, it means a drop target wasn't a column.
+      // We ignore instead of corrupting status.
+      return
+    }
+
+    await updateJobStatus(jobId, candidateStatus)
     router.refresh()
   }
 
   return (
     <AppShell>
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Job Board</h1>
-          <p className="text-muted-foreground">
-            Manage your applications
-          </p>
+          <p className="text-muted-foreground">Manage your applications</p>
         </div>
-
         <AddJobDialog />
       </div>
 
-      <DndContext onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragEnd={handleDragEnd}
+      >
         <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
           {Object.entries(grouped).map(([status, jobs]) => (
             <KanbanColumn
@@ -64,6 +94,7 @@ export default function JobsClient({ jobs }: { jobs: Job[] }) {
               title={status.charAt(0).toUpperCase() + status.slice(1)}
             >
               <SortableContext
+                id={status} // ✅ THIS is what powers containerId
                 items={jobs.map(j => j.id)}
                 strategy={verticalListSortingStrategy}
               >

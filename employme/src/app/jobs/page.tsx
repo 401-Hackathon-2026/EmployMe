@@ -1,7 +1,7 @@
 import { getJobs } from "@/app/actions/jobs"
-import JobsClient from "./JobsClient"
+import JobsClientWrapper from "./JobsClientWrapper"
 
 export default async function JobsPage() {
   const jobs = await getJobs()
-  return <JobsClient jobs={jobs} />
+  return <JobsClientWrapper jobs={jobs} />
 }

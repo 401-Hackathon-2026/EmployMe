@@ -1,16 +1,10 @@
 import AppShell from "@/components/layout/AppShell"
+import JobDetailClient from "./JobDetailClient"
 
-export default function JobDetailPage({
-  params,
-}: {
-  params: { id: string }
-}) {
+export default function JobDetailPage() {
   return (
     <AppShell>
-      <h1 className="text-2xl font-bold">Job Detail</h1>
-      <p className="text-muted-foreground">
-        Job ID: {params.id}
-      </p>
+      <JobDetailClient />
     </AppShell>
   )
 }
