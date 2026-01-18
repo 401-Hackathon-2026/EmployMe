@@ -14,7 +14,8 @@ export interface Job {
   status: JobStatus
   priority: JobPriority
   date_applied: string | null
-  next_action: string | null
-  next_action_date: string | null
+  date_interviwed: string | null
+  date_accepted: string | null
+  date_rejected: string | null
   created_at: string
 }
