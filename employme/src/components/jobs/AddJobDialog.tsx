@@ -32,13 +32,16 @@ export default function AddJobDialog() {
     setLoading(true)
 
     try {
+      const dateApplied = formData.get("date_applied") as string
+      const dateInterview = formData.get("date_of_interview") as string
+
       await createJob({
         company: formData.get("company") as string,
         position: formData.get("position") as string,
         status: formData.get("status") as JobStatus,
         priority: formData.get("priority") as JobPriority,
-        date_applied: formData.get("date_applied") as string | null,
-        date_of_interview: formData.get("date_of_interview") as string | null,
+        date_applied: dateApplied || null,
+        date_of_interview: dateInterview || null,
       })
 
       setOpen(false)
@@ -56,12 +59,12 @@ export default function AddJobDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>+ Add Job</Button>
+        <Button>+ Add Application</Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Job</DialogTitle>
+          <DialogTitle>Add Application</DialogTitle>
         </DialogHeader>
 
         <form action={onSubmit} className="space-y-4">
@@ -124,7 +127,7 @@ export default function AddJobDialog() {
 
           <div className="flex justify-end">
             <Button type="submit" disabled={loading}>
-              {loading ? "Adding..." : "Add Job"}
+              {loading ? "Adding..." : "Add Application"}
             </Button>
           </div>
         </form>

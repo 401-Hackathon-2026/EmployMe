@@ -26,6 +26,12 @@ export default function JobCard({ job }: { job: Job }) {
     opacity: isDragging ? 0.6 : 1,
   }
 
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return null
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -38,9 +44,19 @@ export default function JobCard({ job }: { job: Job }) {
       }}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="font-medium truncate">{job.company}</p>
           <p className="text-muted-foreground truncate">{job.position}</p>
+          
+          {/* Date information - only show if dates exist */}
+          <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+            {job.date_applied && (
+              <p>📅 Applied: {formatDate(job.date_applied)}</p>
+            )}
+            {job.date_of_interview && (
+              <p>🗓️ Interview: {formatDate(job.date_of_interview)}</p>
+            )}
+          </div>
         </div>
 
         {/* Drag handle ONLY */}
