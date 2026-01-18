@@ -53,6 +53,16 @@ export default function AppShell({
               >
                 Calendar
               </Link>
+              <Link 
+                href="/resume/editor"
+                className={`text-sm transition-colors hover:text-foreground ${
+                    pathname === '/resume/editor' 
+                    ? 'text-foreground font-medium' 
+                    : 'text-muted-foreground'
+                }`}
+                >
+                Resume
+                </Link>
             </nav>
           </div>
 
