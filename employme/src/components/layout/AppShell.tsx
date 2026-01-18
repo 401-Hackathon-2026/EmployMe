@@ -41,7 +41,7 @@ export default function AppShell({
                     : 'text-muted-foreground'
                 }`}
               >
-                Jobs
+                Application
               </Link>
               <Link 
                 href="/calendar"
