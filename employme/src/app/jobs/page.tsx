@@ -1,12 +1,7 @@
-import AppShell from "@/components/layout/AppShell"
+import { getJobs } from "@/app/actions/jobs"
+import JobsClientWrapper from "./JobsClientWrapper"
 
-export default function JobsPage() {
-  return (
-    <AppShell>
-      <h1 className="text-2xl font-bold">Job Board</h1>
-      <p className="text-muted-foreground">
-        Kanban board
-      </p>
-    </AppShell>
-  )
+export default async function JobsPage() {
+  const jobs = await getJobs()
+  return <JobsClientWrapper jobs={jobs} />
 }

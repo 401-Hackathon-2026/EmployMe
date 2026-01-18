@@ -7,7 +7,6 @@ import { initialResumeState, ResumeData } from '@/types/resume';
 
 import { ResumeForm } from '@/components/editor/ResumeForm'
 
-// !!! MAGIC TRICK: Dynamic Import to prevent "window is not defined" error
 const PDFPreview = dynamic(
   () => import('@/components/pdf/PDFViewerComponent').then((mod) => mod.PDFViewerComponent),
   {
@@ -20,7 +19,6 @@ export default function EditorPage() {
   const [data, setData] = useState<ResumeData>(initialResumeState);
   const [debouncedData] = useDebounce(data, 500);
 
-  // Helper to update state
   const updateField = (field: keyof ResumeData, value: any) => {
     setData((prev) => ({ ...prev, [field]: value }));
   };
@@ -38,8 +36,6 @@ export default function EditorPage() {
 
       {/* --- RIGHT SIDE: The Live Preview --- */}
       <div className="w-1/2 bg-gray-500 flex justify-center items-center">
-        {/* We wrap this in a fixed container to match A4 aspect ratio if we want, 
-            but PDFViewer handles scroll automatically */}
         <PDFPreview data={debouncedData} />
       </div>
 
