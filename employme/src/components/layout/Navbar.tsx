@@ -30,7 +30,7 @@ export function Navbar({ children }: NavbarProps) {
             Dashboard
           </Link>
           <Link href="/jobs" className={getLinkClass('/jobs')}>
-            Jobs
+            Application
           </Link>
           <Link href="/calendar" className={getLinkClass('/calendar')}>
             Calendar

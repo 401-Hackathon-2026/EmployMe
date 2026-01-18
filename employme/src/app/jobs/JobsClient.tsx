@@ -93,7 +93,7 @@ export default function JobsClient() {
     return (
       <AppShell>
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">Loading jobs...</p>
+          <p className="text-muted-foreground">Loading Applications...</p>
         </div>
       </AppShell>
     )
@@ -103,7 +103,7 @@ export default function JobsClient() {
     <AppShell>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Job Board</h1>
+          <h1 className="text-2xl font-bold">Application</h1>
           <p className="text-muted-foreground">Manage your applications</p>
         </div>
         <AddJobDialog />

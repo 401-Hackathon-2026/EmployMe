@@ -59,12 +59,12 @@ export default function AddJobDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>+ Add Job</Button>
+        <Button>+ Add Application</Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Job</DialogTitle>
+          <DialogTitle>Add Application</DialogTitle>
         </DialogHeader>
 
         <form action={onSubmit} className="space-y-4">
@@ -127,7 +127,7 @@ export default function AddJobDialog() {
 
           <div className="flex justify-end">
             <Button type="submit" disabled={loading}>
-              {loading ? "Adding..." : "Add Job"}
+              {loading ? "Adding..." : "Add Application"}
             </Button>
           </div>
         </form>
