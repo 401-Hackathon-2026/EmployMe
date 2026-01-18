@@ -31,16 +31,22 @@ export default function AddJobDialog() {
   async function onSubmit(formData: FormData) {
     setLoading(true)
 
-    await createJob({
-      company: formData.get("company") as string,
-      position: formData.get("position") as string,
-      status: formData.get("status") as JobStatus,
-      priority: formData.get("priority") as JobPriority,
-    })
+    try {
+      await createJob({
+        company: formData.get("company") as string,
+        position: formData.get("position") as string,
+        status: formData.get("status") as JobStatus,
+        priority: formData.get("priority") as JobPriority,
+      })
 
-    setLoading(false)
-    setOpen(false)
-    router.refresh()
+      setOpen(false)
+      router.refresh()
+    } catch (error) {
+      console.error("Error creating job:", error)
+      alert(error instanceof Error ? error.message : "Failed to create job")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

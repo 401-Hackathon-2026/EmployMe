@@ -1,37 +1,34 @@
 "use client"
 
-import { useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"
+import { login } from "@/app/actions/auth"
+import { Button } from "@/components/ui/button"
 
 export default function Home() {
-  // this is our States for inputs
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState(""); 
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  // THIS is our handler for functions
   const handleLogin = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    if (error) {
-      setErrorMessage("Wrong email or password"); // simple red error
-    } else {
-      setErrorMessage(""); // clear error
-      window.location.href = "/dashboard";
+    setLoading(true)
+    setErrorMessage("")
+    
+    const result = await login(email, password)
+    
+    if (result?.error) {
+      setErrorMessage(result.error)
+      setLoading(false)
     }
-  };
+    // On success, the server action will redirect
+  }
 
-  // THIS RENDERS UI FOR OUR PAGE
   return (
     <main className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-sm space-y-6 text-center">
         <h1 className="text-4xl font-bold">EmployMe</h1>
         <p className="text-lg text-muted-foreground">Welcome!</p>
-        {/* INPUTS */}
+        
         <div className="space-y-4 text-left">
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
@@ -42,8 +39,12 @@ export default function Home() {
               type="email"
               placeholder="Enter your email"
               value={email}
-              onChange={(e) => {setEmail(e.target.value); setErrorMessage("")}}
+              onChange={(e) => {
+                setEmail(e.target.value)
+                setErrorMessage("")
+              }}
               className="w-full rounded-md border px-3 py-2"
+              disabled={loading}
             />
           </div>
 
@@ -55,21 +56,38 @@ export default function Home() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-md border px-3 py-2"
+              disabled={loading}
             />
           </div>
         </div>
-        {/*BUTTONS*/}
+        
         <div className="space-y-2">
-          <Button className="w-full" onClick={handleLogin}>
-            Login
+          <Button 
+            className="w-full" 
+            onClick={handleLogin}
+            disabled={loading}
+          >
+            {loading ? "Logging in..." : "Login"}
           </Button>
 
           <div className="flex justify-between text-sm">
-            <button className="underline" onClick={() => window.location.href = "/signup"}>Create Account</button>
-            <button className="underline" onClick={() => window.location.href = "/password_reset"}>Forgot Password</button>
+            <button 
+              className="underline" 
+              onClick={() => window.location.href = "/signup"}
+              disabled={loading}
+            >
+              Create Account
+            </button>
+            <button 
+              className="underline" 
+              onClick={() => window.location.href = "/password_reset"}
+              disabled={loading}
+            >
+              Forgot Password
+            </button>
           </div>
         </div>
       </div>
     </main>
-  );
+  )
 }
