@@ -1,0 +1,61 @@
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function proxy(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Refresh session - this is critical
+  const { data: { session } } = await supabase.auth.getSession()
+  
+  console.log('Middleware - Path:', request.nextUrl.pathname)
+  console.log('Middleware - Has session:', !!session)
+
+  const { pathname } = request.nextUrl
+
+  // Protected routes that require authentication
+  const protectedRoutes = ['/dashboard', '/jobs']
+  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
+
+  // Redirect to login if accessing protected route without auth
+  if (isProtectedRoute && !session) {
+    console.log('Middleware - Redirecting to login (no session)')
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+
+  // Redirect to dashboard if logged in user tries to access login page
+  if (pathname === '/' && session) {
+    console.log('Middleware - Redirecting to dashboard (has session)')
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
+  return supabaseResponse
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}

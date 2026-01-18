@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabase"
 import { updateJob, deleteJob } from "@/app/actions/jobs"
 import { Job } from "@/types/job"
 
@@ -17,59 +16,49 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 
-export default function JobDetailClient() {
+// We'll fetch job data server-side now
+export default function JobDetailClient({ initialJob }: { initialJob: Job }) {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
 
-  const [job, setJob] = useState<Job | null>(null)
+  const [job, setJob] = useState<Job>(initialJob)
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    async function loadJob() {
-      const { data, error } = await supabase
-        .from("jobs")
-        .select("*")
-        .eq("id", id)
-        .single()
-
-      if (error) {
-        console.error(error)
-        return
-      }
-
-      setJob(data)
-    }
-
-    loadJob()
-  }, [id])
-
-  if (!job) return <p>Loading...</p>
 
   async function onSave(formData: FormData) {
     if (!job) return
     setLoading(true)
-  
-    const updatedJob = {
-      ...job,
-      company: formData.get("company") as string,
-      position: formData.get("position") as string,
-      status: formData.get("status") as any,
-      priority: formData.get("priority") as any,
+
+    try {
+      const updatedJob = {
+        company: formData.get("company") as string,
+        position: formData.get("position") as string,
+        status: formData.get("status") as any,
+        priority: formData.get("priority") as any,
+      }
+
+      await updateJob(job.id, updatedJob)
+
+      setJob({ ...job, ...updatedJob })
+      setEditing(false)
+    } catch (error) {
+      console.error("Error updating job:", error)
+      alert(error instanceof Error ? error.message : "Failed to update job")
+    } finally {
+      setLoading(false)
     }
-  
-    await updateJob(job.id, updatedJob)
-  
-    setJob(updatedJob)
-  
-    setEditing(false)
-    setLoading(false)
   }
 
   async function onDelete() {
     if (!confirm("Delete this job permanently?")) return
-    await deleteJob(job!.id)
-    router.push("/jobs")
+    
+    try {
+      await deleteJob(job.id)
+      router.push("/jobs")
+    } catch (error) {
+      console.error("Error deleting job:", error)
+      alert(error instanceof Error ? error.message : "Failed to delete job")
+    }
   }
 
   return (
@@ -78,10 +67,12 @@ export default function JobDetailClient() {
 
       {!editing ? (
         <>
-          <p><strong>Company:</strong> {job.company}</p>
-          <p><strong>Position:</strong> {job.position}</p>
-          <p><strong>Status:</strong> {job.status}</p>
-          <p><strong>Priority:</strong> {job.priority}</p>
+          <div className="space-y-2">
+            <p><strong>Company:</strong> {job.company}</p>
+            <p><strong>Position:</strong> {job.position}</p>
+            <p><strong>Status:</strong> {job.status}</p>
+            <p><strong>Priority:</strong> {job.priority}</p>
+          </div>
 
           <div className="flex gap-2">
             <Button onClick={() => setEditing(true)}>Edit</Button>
