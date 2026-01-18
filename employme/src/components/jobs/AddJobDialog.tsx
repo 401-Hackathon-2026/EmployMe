@@ -1,9 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createJob } from "@/app/actions/jobs"
-import { supabase } from "@/lib/supabase/client"
 import { JobStatus, JobPriority } from "@/types/job"
 
 import {
@@ -28,28 +27,11 @@ export default function AddJobDialog() {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
-
-  // Get user ID when component mounts
-  useEffect(() => {
-    async function getUserId() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUserId(user?.id || null)
-      console.log("Client-side user ID:", user?.id)
-    }
-    getUserId()
-  }, [])
 
   async function onSubmit(formData: FormData) {
-    if (!userId) {
-      alert("You must be logged in to add a job")
-      return
-    }
-
     setLoading(true)
 
     await createJob({
-      userId: userId,  // Pass the user ID to the server action
       company: formData.get("company") as string,
       position: formData.get("position") as string,
       status: formData.get("status") as JobStatus,
