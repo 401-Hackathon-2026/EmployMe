@@ -9,31 +9,29 @@ type SankeyData = {
 
 export default function SankeyChart({ data }: { data: SankeyData }) {
   const hasData =
-    !!data &&
-    Array.isArray(data.nodes) &&
-    Array.isArray(data.links) &&
-    data.nodes.length > 0 &&
-    data.links.length > 0
+    data.nodes.length > 0 && data.links.length > 0
 
   if (!hasData) {
     return (
-      <div className="h-[260px] w-full flex items-center justify-center text-sm text-muted-foreground border rounded-md">
+      <div className="flex h-[420px] items-center justify-center rounded-md border text-sm text-muted-foreground">
         No application flow yet
       </div>
     )
   }
 
   return (
-    <div className="h-[260px] w-full min-w-0">
+    <div className="h-[420px] w-full">
       <ResponsiveSankey
         data={data}
-        margin={{ top: 10, right: 10, bottom: 10, left: 10 }}
+        margin={{ top: 20, right: 40, bottom: 20, left: 40 }}
         align="justify"
         colors={{ scheme: "category10" }}
-        nodeThickness={14}
-        nodeInnerPadding={4}
-        linkOpacity={0.4}
+        nodeThickness={18}
+        nodeInnerPadding={6}
+        linkOpacity={0.45}
         enableLinkGradient
+        labelPosition="outside"
+        labelPadding={8}
       />
     </div>
   )
